@@ -1,0 +1,521 @@
+
+select e.*,d.deptname from 
+emp e right join dept d
+on e.deptno=d.deptno;
+
+select * from emp e
+where e.sal>(select sal from emp
+where empname='关羽');
+
+select e.empname,ifnull(m.empname,'BOSS')
+as lead from emp e left join emp m
+on e.mgr=m.empno;
+
+
+select job,connt(*) from emp e
+group by job
+having min(sal)>1500;
+
+
+select e.empno,e.deptno from emp e
+where e.deptno=(select deptno from dept
+where deptname='销售部');
+
+
+select e.*,d.deptname from emp e,dept d
+where e.deptno=d.deptno and e.job=(
+select job from emp where empname='曹操');
+
+
+select e.empname,e.sal,d.deptname from emp e,dept d
+where e.deptno=d.deptno and e.sal>
+(select max(sal) from emp where deptno=30);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select name,chinese+math+ifnull(english,0) 总分 from exam
+order by chinese+math+ifnull(english,0) desc;
+
+
+
+select * from exam where name like "张%" order by 总分;
+
+
+
+select * from exam
+
+
+select count(*) from exam;
+
+select count(*) from exam where math>75;
+
+select count(name),chinese+math+ifnull(english,0) 总分 from exam
+where chinese+math+ifnull(english,0)>230;
+
+
+select sum(math) 数学总成绩 from exam;
+
+select sum(math)+sum(chinese)+sum(ifnull(english,0)) 班级总成绩 from exam;
+
+
+select sum(chinese+math+ifnull(english,0)) from exam;
+
+
+select english from exam;
+select sum(english)/count(*) from exam;
+
+
+select avg(english) from exam;
+
+
+select avg(chinese+math+ifnull(english,0)) from exam;
+
+
+select min(chinese+math+ifnull(english,0)) from exam;
+
+
+select * from orders group by product;
+
+select count(*) from orders group by product;
+
+select sum(price) from orders group by product;
+
+
+select product,sum(price) 总价  from orders group by product
+having sum(price)>100;
+
+
+select product,price from orders where price<100
+group by product having sum(price)>100;
+
+
+
+create table dept(
+			id int primary key auto_increment,
+			name varchar(20)
+		);
+
+		insert into dept values(null, '财务部');
+		insert into dept values(null, '人事部');
+		insert into dept values(null, '科技部');
+		insert into dept values(null, '销售部');
+
+		create table emp(
+			id int primary key auto_increment,
+			name varchar(20),
+			dept_id int, 
+			foreign key(dept_id) references dept(id)
+		);
+		
+		insert into emp values(null, '张三', 1);
+		insert into emp values(null, '李四', 2);
+		insert into emp values(null, '老王', 3);
+		insert into emp values(null, '赵四', 4);
+		insert into emp values(null, '刘能', 4);
+
+
+
+
+select * from emp,dept where dept.id=dept_id;
+
+
+select * from emp inner join dept on
+dept.id=dept_id;
+
+
+select * from dept left join emp on dept.id=dept_id
+union
+select * from dept right join emp on dept.id=dept_id;
+
+
+
+select * from dept full join emp dept.id=dept_id;//###mysql不支持全外连接查询
+
+
+
+
+
+select deptname,empname,empno,emp.deptno from dept,
+emp where emp.deptno=dept.deptno;
+
+
+select deptname,empname,empno,emp.deptno from dept left join
+emp on emp.deptno=dept.deptno;
+
+
+
+select empno,empname,sal from emp where sal>
+(select sal from emp where empname='关羽');
+
+
+
+select avg(sal),count(*),deptno from emp e
+group by deptno;
+
+
+select d.*,count(*) from dept d,emp e
+where d.deptno=e.deptno
+group by deptno;
+
+
+
+select e.empno,e.emoname,d.deptname from emp e left join
+emp m on e.mgr=m.empno left join dept d on e.deptno=d.deptno
+where e.hiredate<m.hiredate;
+
+
+
+
+
+use mydb1;
+create table user(
+   id int primary key auto_increment,
+   username varchar(50),
+   password varchar(50)
+);
+insert into user values(null,'admin','123');
+insert into user values(null,'张飞','123');
+insert into user values(null,'赵云','123');
+
+SQL注入漏洞:
+select * from user where username='张飞'#'' and password='';
+select * from user where username='赵云' or '1=1' and password='';
+
+SQL注入攻击：由于后台的sql语句是拼接而来的，其中的参数是用户提交的，如果用户提交参数时
+添加来一些sql关键字后者特殊符号，就可能导致SQL语句语意的改变，从而执行一些意外的操作！
+
+
+create database mybatis;
+create table user(
+        id int primary key auto_increment,
+	name varchar(50),
+	age int(11),
+	sex varchar(50),
+	dept_id int(11)
+);
+
+insert into user values(null,"张飞",43,"男",1);
+insert into user values(null,"赵云",30,"男",2);
+
+
+
+三张表关联查询:
+
+select * from
+(select * from
+user_p u
+	left join
+(select u.user_info_id,u.name,u.card_no,u.manager_id,m.m_name, 
+u.join_date,u.salary,u.birthday,u.gender,u.station,u.telephone,u.user_level,
+u.remark,u.order_no from
+user_info_p u
+	left join
+(select user_info_id m_id,name m_name from user_info_p) m
+	on u.manager_id=m.m_id) info
+	on u.user_id=info.user_info_id) u
+	left join
+(select dept_id d_id,dept_name from dept_p) d
+	on u.dept_id=d.d_id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
