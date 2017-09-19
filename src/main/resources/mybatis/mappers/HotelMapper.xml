@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hotel.mapper.HotelMapper">
+	<resultMap type="Hotel" id="hotelM" autoMapping="true">
+		<id column="hotel_id" property="hotelId" />
+		<association property="area" javaType="Area">
+			<id column="area_id" property="areaId" />
+			<result column="area_name" property="areaName" />
+			<association property="city" javaType="City">
+				<id column="city_id" property="cityId" />
+				<result column="city_name" property="cityName" />
+			</association>
+		</association>
+	</resultMap>
+	<!-- 查找所有酒店信息 不包括商品和图片 -->
+	<select id="findAll" resultMap="hotelM">
+		select h.*,a.area_name,c.city_id,c.city_name from hotel h,area a,city c
+		where h.area_id=a.area_id
+		and a.city_id=c.city_id
+	</select>
+	
+	<!-- 根据Id查找酒店信息 -->
+	<select id="findById" resultMap="hotelM">
+		select h.*,a.area_name,c.city_id,c.city_name from hotel h,area a,city c
+		where h.area_id=a.area_id
+		and a.city_id=c.city_id
+		and h.hotel_id=#{hotelId}
+	</select>
+	
+	<!-- 插入新的酒店信息 -->
+	<insert id="insert">
+		insert into hotel(
+			hotel_id,
+			area_id,
+			hotel_name,
+			hotel_grade,
+			hotel_address,
+			introduce
+		)values(
+			#{hotelId},
+			#{area.areaId},
+			#{hotelName},
+			#{hotelGrade},
+			#{hotelAddress},
+			#{introduce}
+		)
+	</insert>
+	
+	<!-- 修改已有酒店信息 -->
+	<update id="update">
+		update hotel set
+			area_id=#{area.areaId},
+			hotel_name=#{hotelName},
+			hotel_grade=#{hotelGrade},
+			hotel_address=#{hotelAddress},
+			introduce=#{introduce}
+		where hotel_id=#{hotelId}
+	</update>
+	
+	<!-- 删除酒店信息 -->
+	<delete id="delete">
+		delete from hotel where hotel_id=#{hotelId}
+	</delete>
+	
+	<!-- 删除酒店的关联图片 -->
+	<select id="findPicture" resultType="java.lang.String">
+		select hotel_picture_adress from hotel_picture
+		where hotel_id=#{hotelId}
+	</select>
+	
+	<!-- 插入图片 -->
+	<insert id="insertPicture">
+		insert into hotel_picture (
+			hotel_id,
+			hotel_picture_address,
+			hotel_picture_id
+		)values(
+			#{hotelId},
+			#{pictureURL},
+			#{pictureId}
+		)
+	</insert>
+	
+	<!-- 删除酒店的关联图片 -->
+	<delete id="deletePicture">
+		delete from hotel_picture 
+		where hotel_id = #{hotelId}
+	</delete>
+	
+	<!-- 删除酒店关联的商品 -->
+	<delete id="deleteProduct">
+		delete from hotel
+		where hotel_id = #{hotelId}
+	</delete>
+	<!-- 陈佳峰 -->
+	<resultMap type="Hotel" id="hotelRM" autoMapping="true">
+		<!-- 完成主表映射 -->
+		<id column="hotel_id" property="hotelId"/>
+
+		<association property="area" javaType="Area">
+			<id column="area_id" property="areaId"/>
+			<result column="area_name" property="areaName"/>
+		</association>
+
+
+		<!-- 封装区域对象 -->
+		<!--<association property="hotel_picture" javaType="HotelPicture" resultMap="hpicRM"/>
+		
+
+
+		<association property="hotel_picture" javaType="HotelPicture">
+			<id column="hotel_picture_id" property="hotelPicId"/>
+			<result column="hotel_picture_url" property="hotelPicUrl"/>
+		</association>-->
+	</resultMap>
+	<!-- 根据酒店星级、酒店价格、酒店名字查找 -->
+	<select id="findHotels" resultMap="hotelRM">
+	SELECT * FROM hotel h
+	LEFT JOIN area a
+	ON h.area_id=a.area_id
+	LEFT JOIN hotel_product_r hp ON h.hotel_id=hp.hotel_id
+	WHERE TRUE
+	<if test="areaName!=null and areaName != ''">
+		AND a.area_name=#{areaName}
+	</if>
+	<if test="hotelGrades!=null">
+		AND hotel_grade IN (
+		<foreach collection="hotelGrades" item="grade" separator=",">
+			#{grade}
+		</foreach>
+		)
+	</if>
+	<if test="minPrice!=null and minPrice != ''">
+		AND product_price &gt; #{minPrice}
+	</if>
+	<if test="maxPrice!=null and maxPrice != ''">
+		AND product_price &lt; #{maxPrice}
+	</if>
+	<if test="hotelName!=null and hotelName != ''">
+		AND hotel_name LIKE concat(concat('%',#{hotelName}),'%')
+	</if>
+	</select>
+
+	<select id="findHotelByHotelId" resultType="Hotel">
+		select * from hotel where hotel_id = #{hotelId}
+	</select>
+	
+</mapper>

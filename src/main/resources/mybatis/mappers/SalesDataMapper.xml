@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hotel.mapper.SalesDataMapper">
+	<!-- 查询销售数据 -->
+	<resultMap type="SalesData" id="salesDataM" autoMapping="true">
+		<result column="product_sales" property="productSales" />
+		<result column="sales_amount" property="salesAmount" />
+		<result column="order_count" property="orderCount" />
+	</resultMap>
+	<select id="findSalesDates" resultMap="salesDataM">
+		select * from
+		(select h.hotel_id,h.hotel_name,hp.product_name,
+		hp.product_id,hr.product_price
+		from hotel h,hotel_product_r
+		hr,hotel_product hp
+		where h.hotel_id = hr.hotel_id
+		and hp.product_id =
+		hr.product_id
+		<if test="hotelId!=''">
+			and h.hotel_id = #{hotelId}
+		</if>
+		<if test="productId!=''">
+			and hp.product_id = #{productId}
+		</if>
+		) pro
+		left join
+		(select o.product_id p,o.hotel_id h,
+		count(o.order_id)
+		order_count,
+		sum(o.order_price) sales_amount,
+		sum(o.product_count)
+		product_sales
+		from
+		(select * from order_h
+		<where>
+			create_time > #{minDate}
+			and create_time &lt; #{maxDate}
+			<if test="hotelId!=''">
+				and hotel_id = #{hotelId}
+			</if>
+			<if test="productId!=''">
+				and product_id = #{productId}
+			</if>
+			<if test="orderState>=0">
+				and order_state = #{orderState}
+			</if>
+		</where>
+		) o
+		group by o.product_id,o.hotel_id) ord
+		on ord.p = pro.product_id
+		and
+		ord.h = pro.hotel_id
+	</select>
+
+</mapper>

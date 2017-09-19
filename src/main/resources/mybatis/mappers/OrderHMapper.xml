@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hotel.mapper.OrderHMapper">
+	<select id="findPayAndState" resultType="OrderH">
+		select * from order_h
+		<where>
+			<if test="pay>=0">pay_state=#{pay}</if>
+			and
+			<if test="state>=0">order_state=#{state}</if>
+		</where>
+	</select>
+
+	<select id="findByTime">
+		selete * from order_h
+		where create_time >=#{min}
+		and create_time &lt; #{max}
+	</select>
+
+	<insert id="insert">
+		insert into order_h(
+		oreder_id,
+		hotel_id,
+		create_time,
+		pay_state,
+		order_state,
+		user_id,
+		check_in_time,
+		check_out_time,
+		pay_type,
+		product_id
+		product_count,
+		order_picture
+		)values(
+		#{orderId},
+		#{hotelId},
+		#{createTime},
+		#{payState},
+		#{orderState},
+		#{userId},
+		#{checkInTime},
+		#{checkOutTime},
+		#{payType},
+		#{product.productId},
+		#{count},
+		#{orderPrice}
+		)
+	</insert>
+
+	<update id="update">
+		update order_h set
+		hotel_id = #{hotelId},
+		create_time = #{createTime},
+		pay_state = #{payState},
+		order_state = #{orderState},
+		user_id = #{userId},
+		check_in_time = #{checkInTime},
+		check_out_time= #{checkOutTime},
+		pay_type = #{payType},
+		product_id = #{product.productId},
+		product_count = #{count},
+		order_picture = #{orderPrice}
+		where order_id = #{orderId}
+	</update>
+	<resultMap type="OrderH" id="orderM" autoMapping="true">
+		<id column="order_id" property="orderId" />
+		<association property="product" javaType="HotelProduct">
+			<result column="product_name" property="productName" />
+			<result column="product_price" property="productPrice" />
+		</association>
+	</resultMap>
+	<!-- 根据id查询订单的详细信息 -->
+	<select id="findById" resultMap="orderM">
+		select
+		oh.*,hr.product_price,hp.product_name
+		from order_h oh,hotel_product_r hr,hotel_product hp
+		where oh.hotel_id=hr.hotel_id
+		and oh.product_id=hr.product_id
+		and oh.product_id=hp.product_id
+		and oh.order_id=#{orderId}
+	</select>
+	
+	<!-- 根据条件查询订单 -->
+	<select id="orderSelect" resultType="OrderH">
+		select * from order_h
+		<where>
+			create_time > #{minTime}
+			and create_time &lt; #{maxTime}
+			and hotel_id=#{hotelId}
+			and order_price > #{minPrice}
+			and order_price &lt; #{maxPrice}
+		</where>
+	</select>
+	
+</mapper>

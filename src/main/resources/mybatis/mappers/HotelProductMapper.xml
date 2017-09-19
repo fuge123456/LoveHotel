@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hotel.mapper.HotelProductMapper">
+	<!-- 查询所有商品的基本信息 -->
+	<select id="findAll" resultType="HotelProduct">
+		select * from hotel_product
+	</select>
+
+	<!-- 查询某个酒店所有商品的信息 -->
+	<select id="findByHotelId" resultType="HotelProduct">
+		select * from
+		hotel_product_r r,hotel_Product h
+		where r.product_id = h.product_id
+		and r.hotel_id=#{hotelId}
+	</select>
+
+	<!-- 查询单个商品的信息 -->
+	<select id="findById" resultType="HotelProduct">
+		select * from hotel_product
+		where product_id = #{hotelProductId}
+	</select>
+
+	<!-- 查询酒店所属的单个商品信息 -->
+	<select id="findByHidPid" resultType="HotelProduct">
+		select
+		hp.*,r.hotel_id,r.product_price,r.product_stock
+		from hotel_product hp, hotel_product_r r
+		where hp.product_id = r.product_id
+		and r.product_id = #{hProductId}
+		and r.hotel_id=#{hotelId}
+	</select>
+
+	<!-- 插入商品信息 -->
+	<insert id="insertP">
+		Insert into hotel_product(
+		product_id,
+		product_name,
+		product_remark,
+		breakfast,
+		wifi,
+		park
+		)values(
+		#{productId},
+		#{productName},
+		#{productRemark},
+		#{breakfast},
+		#{wifi},
+		#{park}
+		)
+	</insert>
+
+	<!-- 添加酒店的商品信息 就是添加关联表信息 -->
+	<insert id="insert">
+		insert into hotel_product_r(
+		hotel_id,
+		product_id,
+		product_price,
+		product_stock
+		)values(
+		#{hotelId},
+		#{hp.productId},
+		#{hp.productPrice},
+		#{hp.productStock}
+		)
+	</insert>
+
+	<!-- 修改商品基础信息 -->
+	<update id="updateP">
+		update hotel_product
+		set
+		product_name=#{productName},
+		product_remark=#{productRemark},
+		breakfast=#{breakfast},
+		wifi=#{wifi},
+		park=#{park}
+		where product_id =
+		#{productId}
+	</update>
+
+	<!-- 修改酒店的商品信息 -->
+	<update id="update">
+		update hotel_product_r
+		set product_price =
+		#{hp.productPrice},
+		product_stock = #{hp.productStock}
+		where hotel_id = #{hotelId}
+		and product_id = #{hp.productId}
+
+	</update>
+
+	<!-- 删除酒店和商品的关联信息 -->
+	<delete id="delete">
+		delete from hotel_product_r
+		where hotel_id =
+		#{hotelId}
+		and product_id = #{hProductId}
+	</delete>
+
+	<delete id="deleteP">
+		delete from hotel_product
+		where product_id = #{hProductId}
+	</delete>
+
+	<select id="findPicture" resultType="java.lang.String">
+		select
+		product_picture_address from product_picture
+		where product_id =
+		#{hotelProductId}
+	</select>
+
+	<!-- 插入商品对应图片 -->
+	<insert id="insertPicture">
+		insert into product_picture(
+		product_id,
+		product_picture_address,
+		product_picture_id
+		)values(
+		#{hotelProductId},
+		#{url},
+		#{pictureId},
+		)
+	</insert>
+
+	<!-- 删除某商品的所有图片 -->
+	<delete id="deletePicture">
+		delete from product_picture
+		where product_id =
+		#{hotelProductId}
+	</delete>
+
+	<select id="findHotelByHotelProduct" resultType="HotelProduct">
+		select * from hotel_product_r h
+		left join
+		(select product_id p_id, product_name, product_remark, breakfast,wifi,park from hotel_product) o
+		on h.product_id=o.p_id
+		where hotel_id = #{HotelId}
+	</select>
+
+</mapper>
